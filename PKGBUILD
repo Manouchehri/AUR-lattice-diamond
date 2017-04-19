@@ -1,23 +1,31 @@
 # Maintainer: doragasu <doragasu (yawn) hotmail (roll) com>
+# Contributor: David Manouchehri
 
-pkgname=lattice-diamond
-pkgver=3.7
-pkgrel=1
+pkgname="lattice-diamond"
 pkgdesc="Lattice Diamond design software"
-arch=('x86_64')
-url="http://www.latticesemi.com/latticediamond"
+url="http://www.latticesemi.com/"
 license=('custom')
-options=('!strip')
-provides=('lattice-diamond')
-conflicts=('lattice-diamond')
-source=(http://files.latticesemi.com/Diamond/3.7/diamond_3_7-base_x64-96-1-x86_64-linux.rpm
-		synp-plat-check.patch
-		lattice-diamond.png
-		lattice-diamond.desktop)
-md5sums=('162ab905a552a72763aa62dc3efe0ef7'
-		 'b03c61ceb13d196d651a6ed26f61c796'
-		 'd04fb58bdb5f67e44b5058e14f3aacf9'
-		 'fbba8b33146178b861871aabdc779fbd')
+pkgver=3.9
+arch=('x86_64')
+source=("http://files.latticesemi.com/Diamond/${pkgver}/diamond_${pkgver/"."/"_"}-base_x64-99-2-${arch}-linux.rpm"
+		"synp-plat-check.patch"
+		"lattice-diamond.png"
+		"lattice-diamond.desktop")
+makedepends=('rpmextract')
+sha512sums=('SKIP')
+# depends=('')
+pkgrel=1
+options=('!strip' '!upx')
+PKGEXT=".pkg.tar"
+
+pkgver() {
+	cd "${srcdir}/${_gitname}"
+	(
+		set -o pipefail
+		git describe --long 2>/dev/null | sed 's/\([^-]*-g\)/r\1/;s/-/./g' ||
+		printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+	)
+}
 
 prepare() {
 	# Extract all the packages
@@ -50,7 +58,8 @@ prepare() {
 build() {
 	# Patch to skip platform check, allowing Synplify Pro to run on non
 	# officially supported platforms
-	patch -p1 < synp-plat-check.patch
+	# patch -p1 < synp-plat-check.patch
+	echo
 }
 
 package() {
@@ -62,3 +71,4 @@ package() {
 	mkdir -p "${pkgdir}/usr/share/applications"
 	cp "$srcdir/lattice-diamond.desktop" "$pkgdir/usr/share/applications/"
 } 
+
